@@ -1,0 +1,10 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommits", ":dependencyDashboard"],
+  "packageRules": [
+    { "matchUpdateTypes": ["minor", "patch"], "automerge": true, "automergeType": "branch" },
+    { "matchDepTypes": ["devDependencies"], "groupName": "dev deps" }
+  ],
+  "schedule": ["before 6am on monday"],
+  "prHourlyLimit": 3
+}

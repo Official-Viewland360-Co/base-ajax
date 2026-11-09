@@ -1,0 +1,144 @@
+# ───────────────────────────────────────────────────────────────────────────────
+# BaseAjax — .gitignore
+#
+# قاعدهٔ کلی: فقط چیزی در مخزن می‌ماند که «منبع، تست، مستندات، مثال یا پیکربندی» است.
+# هر چیزی که با یک دستور بازتولید می‌شود (npm install / npm run build / npm test)
+# نادیده گرفته می‌شود تا مخزن کلون‌شده سبک و قابل‌فهم بماند.
+#
+# بخش «۴» انتهای فایل فهرست چیزهایی است که باید کامیت شوند.
+# ───────────────────────────────────────────────────────────────────────────────
+
+# ── ۱) وابستگی‌ها ─────────────────────────────────────────────────────────────
+# با `npm ci` از package-lock.json دقیقاً بازسازی می‌شوند.
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+jspm_packages/
+
+# ── ۲) خروجی بیلد و کش کامپایل ────────────────────────────────────────────────
+# با `npm run build` (rollup) ساخته می‌شود؛ خروجی نهایی داخل بستهٔ npm منتشر می‌شود.
+dist/
+build/
+lib/
+out/
+*.tsbuildinfo
+.rollup.cache/
+.turbo/
+.parcel-cache/
+.snowpack/
+.cache/
+.eslintcache
+.stylelintcache
+
+# ── ۳) تست، پوشش کد و گزارش‌ها ───────────────────────────────────────────────
+coverage/
+.nyc_output/
+.vitest/
+test-results/
+playwright-report/
+blob-report/
+.lighthouseci/
+test-out.txt
+*.out
+audit-report.json
+sbom.cyclonedx.json
+
+# ── ۴) لاگ‌ها و فایل‌های موقت ────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.tmp
+.tmp*
+tmp-*
+*~
+
+# ── ۵) متغیرهای محیطی و کلیدها (هرگز کامیت نشود) ───────────────────────────
+.env
+.env.*
+.env.local
+.env.*.local
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+.npmrc.local
+
+# ── ۶) ادیتور، IDE و ابزارهای شخصی ──────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+*.code-workspace
+*.swp
+*.swo
+.history/
+.obsidian/
+.fleet/
+*.sublime-workspace
+
+# ── ۷) سیستم‌عامل ────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ── ۸) مدارک تولیدشده و آرشیوها ──────────────────────────────────────────────
+docs/api/
+*.pdf
+!README.pdf
+*.zip
+*.tar.gz
+
+# ── ۹) اسناد داخلی و یادداشت‌های کار ────────────────────────────────────────
+# این‌ها برای کاربر کتابخانه معنا ندارند و فقط مخزن را شلوغ می‌کنند.
+# اگر خواستی منتشرشان کنی، خط مربوطه را حذف یا با «!» استثنا کن.
+IMPLEMENTATION_PLAN.md
+NOTES.md
+TODO.local.md
+
+# ── ۱۰) هوک‌های husky ────────────────────────────────────────────────────────
+# فقط پوشهٔ اجراییِ خودکارِ husky نادیده گرفته می‌شود؛ خود هوک‌ها در مخزن می‌مانند.
+.husky/_
+
+# ── ۱۱) پایدار نگه‌داشتن پایان خط ویندوز ────────────────────────────────────
+# (در صورت استفاده از core.autocrlf خاموش، این‌ها را حذف کن)
+*.orig
+*.rej
+
+# ───────────────────────────────────────────────────────────────────────────────
+# این‌ها باید در مخزن بمانند — حذف/نادیده‌گرفتنشان کار کاربر تازه را سخت می‌کند:
+#
+#   README.md  README.pdf  LICENSE  CHANGELOG.md  examples/README.md
+#   src/            کد منبع (تنها منبع حقیقت)
+#   types/          تعریف‌های TypeScript
+#   tests/          تست‌های واحد، property، types و browser
+#   docs/index.html مستندات کامل فارسی (RTL) و کاملاً مستقل
+#   examples/       دموهای اجرایی
+#   scripts/        serve.mjs ،check-docs.mjs ،verify-exports.mjs
+#   benchmarks/     بنچمارک‌ها
+#   package.json  package-lock.json  rollup.config.mjs  vitest.config.js
+#   tsconfig.json  .browserslistrc  .editorconfig  .nvmrc  .npmrc
+#   renovate.json  .github/  .changeset/  .husky/(به‌جز _)
+#
+# نکته برای کاربر تازه: بعد از کلون، فقط این سه دستور کافی است
+#   npm ci
+#   npm run build        # چون dist/ کامیت نمی‌شود
+#   npm run serve:docs   # → http://localhost:5174
+# ───────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BaseAjax demo</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font: 14px/1.6 system-ui, -apple-system, Segoe UI, sans-serif;
+        max-width: 760px;
+        margin: 2.5rem auto;
+        padding: 0 1rem;
+      }
+      h1 {
+        margin-bottom: 0.25rem;
+      }
+      p.lead {
+        margin-top: 0;
+        opacity: 0.75;
+      }
+      .tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin: 1.25rem 0;
+        flex-wrap: wrap;
+      }
+      button {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #777;
+        background: #111;
+        color: #fff;
+        cursor: pointer;
+        font: inherit;
+      }
+      .tabs button {
+        background: transparent;
+        color: inherit;
+      }
+      .tabs button.active {
+        background: #111;
+        color: #fff;
+      }
+      pre {
+        background: rgba(127, 127, 127, 0.15);
+        padding: 1rem;
+        border-radius: 10px;
+        overflow: auto;
+        min-height: 140px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .hint {
+        margin: 0.75rem 0 0;
+        font-size: 12px;
+        opacity: 0.75;
+      }
+      .hint code {
+        background: rgba(127, 127, 127, 0.2);
+        padding: 0.1rem 0.3rem;
+        border-radius: 4px;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.5rem;
+        margin: 1rem 0 0;
+      }
+      .stat {
+        border: 1px solid rgba(127, 127, 127, 0.4);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+      }
+      .stat dt {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        opacity: 0.65;
+      }
+      .stat dd {
+        margin: 0.15rem 0 0;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        word-break: break-all;
+      }
+      .error-state {
+        border-left: 3px solid #e5534b;
+        padding-left: 0.75rem;
+      }
+      .error-state dd {
+        font-weight: 400;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>BaseAjax demo</h1>
+    <p class="lead">
+      Offline demo of the core client plus the full plugin layer: queue → dedupe → cache → circuit
+      breaker → trace.
+    </p>
+
+    <div class="tabs" role="group" aria-label="Mode">
+      <button type="button" data-mode="mock" class="active">mock transport</button>
+      <button type="button" data-mode="network">network (jsonplaceholder)</button>
+    </div>
+
+    <div class="row">
+      <button type="button" id="run">Run request</button>
+      <button type="button" id="run-miss">Run unmatched route (404)</button>
+      <button type="button" id="run-bust">Run with bustCache</button>
+      <button type="button" id="reset">Reset plugins</button>
+    </div>
+    <p class="hint">
+      The client is created once and reused, so <code>cache</code> survives between clicks. Two
+      identical requests are sent at once to show <code>dedupe</code> collapsing them into a single
+      transport call.
+    </p>
+
+    <dl class="stats" id="stats"></dl>
+
+    <pre id="out">Ready.</pre>
+
+    <script src="../dist/baseAjax.all.umd.min.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var out = document.getElementById("out");
+        var statsBox = document.getElementById("stats");
+        var BaseAjax = window.BaseAjax;
+
+        if (!BaseAjax || typeof BaseAjax.createClient !== "function") {
+          out.textContent =
+            "Could not load ../dist/baseAjax.all.umd.min.js.\n" +
+            "Run `npm run build` and serve the repository root, e.g. `npm run serve:examples`.";
+          return;
+        }
+
+        var mode = "mock";
+        var client = null;
+        // Captured by the trace plugin so the injected header is visible in the UI.
+        var lastTraceparent = null;
+
+        var MOCK_HANDLERS = [
+          {
+            match: /\/todos\/1/,
+            response: function (req) {
+              return { body: { id: 1, title: "mock todo", url: req.url } };
+            },
+          },
+          {
+            // Demonstrates a failing request: resolves 500, the core turns it into an ApiError.
+            match: /\/boom/,
+            response: { status: 500, body: { error: "server exploded" } },
+          },
+          { match: /.*/, response: { status: 404, body: { error: "not mocked" } } },
+        ];
+
+        document.querySelectorAll(".tabs button").forEach(function (button) {
+          button.addEventListener("click", function () {
+            document.querySelectorAll(".tabs button").forEach(function (other) {
+              other.classList.remove("active");
+            });
+            button.classList.add("active");
+            mode = button.dataset.mode;
+            resetClient();
+          });
+        });
+
+        function baseOptions() {
+          var options = {
+            baseURL: "https://jsonplaceholder.typicode.com",
+            timeout: 8000,
+            retry: { count: 1, delay: 200 },
+            correlationHeader: "X-Request-Id",
+          };
+          if (mode === "mock") {
+            // `origin` lets relative URLs resolve and passes the trusted-origin check.
+            options.origin = "https://jsonplaceholder.typicode.com";
+            options.logLevel = "silent";
+            options.transport = BaseAjax.mock(MOCK_HANDLERS);
+          }
+          return options;
+        }
+
+        function buildClient() {
+          // The combined bundle merges the plugin layer into window.BaseAjax,
+          // so this page only needs the single <script> tag at the bottom.
+          return BaseAjax.compose(
+            BaseAjax.createClient(baseOptions()),
+            function (c) {
+              return BaseAjax.queue(c, { maxConcurrent: 4 });
+            },
+            function (c) {
+              return BaseAjax.dedupe(c);
+            },
+            function (c) {
+              return BaseAjax.cache(c, { ttl: 30000 });
+            },
+            function (c) {
+              return BaseAjax.circuitBreaker(c, {
+                failureThreshold: 3,
+                cooldownMs: 15000,
+              });
+            },
+            function (c) {
+              return BaseAjax.trace(c, {
+                onTrace: function (value) {
+                  lastTraceparent = value;
+                },
+              });
+            },
+          );
+        }
+
+        function resetClient() {
+          client = buildClient();
+          lastTraceparent = null;
+          renderStats();
+        }
+
+        function renderStats(extra) {
+          var rows = [
+            ["BaseAjax version", BaseAjax.VERSION],
+            ["mode", mode],
+            ["cache size", client ? String(client.cache.size()) : "-"],
+            ["dedupe inflight", client ? String(client.inflightSize) : "-"],
+            [
+              "queue active / pending",
+              client ? client.queue.active + " / " + client.queue.pending : "-",
+            ],
+            ["breaker state", client ? client.circuitBreaker.getState() : "-"],
+            ["traceparent", lastTraceparent || "(not sent yet)"],
+          ];
+          (extra || []).forEach(function (row) {
+            rows.push(row);
+          });
+
+          statsBox.textContent = "";
+          rows.forEach(function (row) {
+            var wrap = document.createElement("div");
+            wrap.className = "stat" + (row[2] ? " " + row[2] : "");
+
+            var dt = document.createElement("dt");
+            dt.textContent = row[0];
+
+            var dd = document.createElement("dd");
+            dd.textContent = row[1];
+
+            wrap.appendChild(dt);
+            wrap.appendChild(dd);
+            statsBox.appendChild(wrap);
+          });
+        }
+
+        function describeError(error) {
+          // ApiError carries code / status / data; CircuitOpenError carries code.
+          return {
+            message: error.message,
+            code: error.code || "unknown",
+            status: error.status === undefined ? null : error.status,
+            data: error.data === undefined ? null : error.data,
+          };
+        }
+
+        async function run(label, task) {
+          out.textContent = "Loading...";
+          try {
+            var result = await task();
+            out.textContent = JSON.stringify({ mode: mode, action: label, result: result }, null, 2);
+            renderStats();
+          } catch (error) {
+            out.textContent = JSON.stringify(
+              { mode: mode, action: label, error: describeError(error) },
+              null,
+              2,
+            );
+            renderStats([["last error code", describeError(error).code, "error-state"]]);
+          }
+        }
+
+        document.getElementById("run").addEventListener("click", function () {
+          run("dedupe + cache (two identical GETs)", async function () {
+            var results = await Promise.all([client.get("/todos/1"), client.get("/todos/1")]);
+            return {
+              sameReference: results[0] === results[1],
+              data: results[0],
+              cacheSizeAfter: client.cache.size(),
+            };
+          });
+        });
+
+        document.getElementById("run-miss").addEventListener("click", function () {
+          run("unmatched route -> ApiError", async function () {
+            // `fullResponse` shows status/headers instead of only the parsed body.
+            var res = await client.get("/nope", undefined, { fullResponse: true });
+            return { status: res.status, headers: res.headers, data: res.data };
+          });
+        });
+
+        document.getElementById("run-bust").addEventListener("click", function () {
+          run("bustCache bypasses the cache", async function () {
+            var before = client.cache.size();
+            var res = await client.get("/todos/1", undefined, { bustCache: true });
+            return { data: res, cacheSizeBefore: before, cacheSizeAfter: client.cache.size() };
+          });
+        });
+
+        document.getElementById("reset").addEventListener("click", function () {
+          resetClient();
+          out.textContent = JSON.stringify(
+            { mode: mode, action: "reset", result: "plugin state cleared" },
+            null,
+            2,
+          );
+        });
+
+        resetClient();
+      })();
+    </script>
+  </body>
+</html>

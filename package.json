@@ -1,0 +1,106 @@
+{
+  "name": "base-ajax",
+  "version": "2.0.0",
+  "description": "Dependency-free, secure HTTP client with fetch / XHR / jQuery transports and a composable plugin layer.",
+  "license": "MIT",
+  "author": "BaseAjax contributors",
+  "type": "module",
+  "main": "./dist/baseAjax.cjs",
+  "module": "./dist/baseAjax.esm.js",
+  "browser": "./dist/baseAjax.umd.js",
+  "types": "./types/baseAjax.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/baseAjax.d.ts",
+      "import": "./dist/baseAjax.esm.js",
+      "require": "./dist/baseAjax.cjs",
+      "browser": "./dist/baseAjax.umd.js",
+      "default": "./dist/baseAjax.umd.js"
+    },
+    "./plugins": {
+      "types": "./types/plugins.d.ts",
+      "import": "./dist/plugins.esm.js",
+      "require": "./dist/plugins.cjs",
+      "default": "./dist/plugins.umd.js"
+    },
+    "./all": {
+      "types": "./types/all.d.ts",
+      "import": "./dist/baseAjax.all.esm.js",
+      "require": "./dist/baseAjax.all.cjs",
+      "browser": "./dist/baseAjax.all.umd.min.js",
+      "default": "./dist/baseAjax.all.umd.min.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "types",
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "./src/baseAjax.js",
+    "./dist/*.umd.js",
+    "./dist/*.umd.min.js"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c -w",
+    "test": "vitest run",
+    "test:browser": "npm run build && vitest run tests/browser/bundle.test.js",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:property": "vitest run tests/property",
+    "test:types": "vitest run --typecheck tests/types",
+    "typecheck": "tsc --noEmit",
+    "verify:exports": "node scripts/verify-exports.mjs && node scripts/verify-exports.mjs --cjs-first",
+    "audit:ci": "npm audit --omit=dev --audit-level=moderate",
+    "bench": "npm run build && node benchmarks/core.bench.js",
+    "serve:examples": "node scripts/serve.mjs examples 5173",
+    "serve:docs": "node scripts/serve.mjs docs 5174",
+    "check:docs": "node scripts/check-docs.mjs",
+    "build:docs-en": "node scripts/build-docs-en.mjs",
+    "check:docs-en": "node scripts/check-docs-en.mjs",
+    "verify": "npm run typecheck && npm run test:types && npm run test:coverage && npm run build && npm run verify:exports",
+    "prepublishOnly": "npm run verify"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ajax",
+    "fetch",
+    "xhr",
+    "jquery",
+    "http-client",
+    "retry",
+    "interceptor",
+    "csrf",
+    "token",
+    "circuit-breaker",
+    "dedupe",
+    "cache"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Official-Viewland360-Co/base-ajax.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Official-Viewland360-Co/base-ajax/issues"
+  },
+  "homepage": "https://github.com/Official-Viewland360-Co/base-ajax#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@rollup/plugin-terser": "1.0.2",
+    "@vitest/coverage-v8": "5.1.0",
+    "fast-check": "4.10.2",
+    "happy-dom": "21.0.4",
+    "rollup": "4.67.4",
+    "typescript": "7.0.2",
+    "vitest": "5.1.0"
+  }
+}
