@@ -1,6 +1,6 @@
 {
   "name": "base-ajax",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Dependency-free, secure HTTP client with fetch / XHR / jQuery transports and a composable plugin layer.",
   "author": "viewland",
   "type": "module",
@@ -29,6 +29,7 @@
       "browser": "./dist/baseAjax.all.umd.min.js",
       "default": "./dist/baseAjax.all.umd.min.js"
     },
+    "./dist/*": "./dist/*",
     "./package.json": "./package.json"
   },
   "files": [
@@ -53,6 +54,7 @@
     "test:property": "vitest run tests/property",
     "test:types": "vitest run --typecheck tests/types",
     "typecheck": "tsc --noEmit",
+    "check:version": "node scripts/check-version.mjs",
     "verify:exports": "node scripts/verify-exports.mjs && node scripts/verify-exports.mjs --cjs-first",
     "audit:ci": "npm audit --omit=dev --audit-level=moderate",
     "bench": "npm run build && node benchmarks/core.bench.js",
@@ -61,7 +63,7 @@
     "check:docs": "node scripts/check-docs.mjs",
     "build:docs-en": "node scripts/build-docs-en.mjs",
     "check:docs-en": "node scripts/check-docs-en.mjs",
-    "verify": "npm run typecheck && npm run test:types && npm run test:coverage && npm run build && npm run verify:exports",
+    "verify": "npm run check:version && npm run typecheck && npm run test:types && npm run test:coverage && npm run build && npm run verify:exports",
     "prepublishOnly": "npm run verify"
   },
   "engines": {

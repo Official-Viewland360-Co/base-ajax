@@ -1,5 +1,5 @@
 /*!
- * BaseAjax v2.0.0
+ * BaseAjax v2.0.1
  * Dependency-free, secure HTTP client with fetch / XHR / jQuery transports.
  * Works as a <script> (window.BaseAjax), CommonJS and AMD module.
  * Author: viewland
@@ -46,7 +46,7 @@
   function (root) {
     "use strict";
 
-    const VERSION = "2.0.0";
+    const VERSION = "2.0.1";
 
     /* ====================================================================
      * 1. Constants

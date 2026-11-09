@@ -1,5 +1,5 @@
 /**
- * Type definitions for BaseAjax v2.0.0
+ * Type definitions for BaseAjax v2.0.1
  *
  * The runtime lives in `src/baseAjax.js` (a dependency-free UMD file).
  * This file mirrors its public surface exactly; keep them in sync.
@@ -252,7 +252,6 @@ export interface BaseAjaxGlobal extends BaseAjaxClient {
 declare const BaseAjax: BaseAjaxGlobal;
 export default BaseAjax;
 
-export declare const ApiError: typeof ApiError;
 export declare function isApiError(error: unknown): error is ApiError;
 export declare const transports: BaseAjaxGlobal["transports"];
 export declare const CODES: BaseAjaxGlobal["CODES"];
