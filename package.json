@@ -2,8 +2,7 @@
   "name": "base-ajax",
   "version": "2.0.0",
   "description": "Dependency-free, secure HTTP client with fetch / XHR / jQuery transports and a composable plugin layer.",
-  "license": "MIT",
-  "author": "BaseAjax contributors",
+  "author": "viewland",
   "type": "module",
   "main": "./dist/baseAjax.cjs",
   "module": "./dist/baseAjax.esm.js",
@@ -37,8 +36,7 @@
     "types",
     "src",
     "README.md",
-    "CHANGELOG.md",
-    "LICENSE"
+    "CHANGELOG.md"
   ],
   "sideEffects": [
     "./src/baseAjax.js",

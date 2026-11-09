@@ -2,7 +2,7 @@
  * BaseAjax v2.0.0
  * Dependency-free, secure HTTP client with fetch / XHR / jQuery transports.
  * Works as a <script> (window.BaseAjax), CommonJS and AMD module.
- * License: MIT
+ * Author: viewland
  */
 (function (root, factory) {
   "use strict";

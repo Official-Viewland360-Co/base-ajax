@@ -125,7 +125,7 @@ TODO.local.md
 # ───────────────────────────────────────────────────────────────────────────────
 # این‌ها باید در مخزن بمانند — حذف/نادیده‌گرفتنشان کار کاربر تازه را سخت می‌کند:
 #
-#   README.md  README.pdf  LICENSE  CHANGELOG.md  examples/README.md
+#   README.md  README.pdf  CHANGELOG.md  examples/README.md
 #   src/            کد منبع (تنها منبع حقیقت)
 #   types/          تعریف‌های TypeScript
 #   tests/          تست‌های واحد، property، types و browser

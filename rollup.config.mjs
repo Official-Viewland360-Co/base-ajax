@@ -1,6 +1,6 @@
 import terser from "@rollup/plugin-terser";
 
-const banner = `/*! BaseAjax v2.0.0 | MIT License | https://github.com/Official-Viewland360-Co/base-ajax */`;
+const banner = `/*! BaseAjax v2.0.0 | https://github.com/Official-Viewland360-Co/base-ajax */`;
 
 const shared = { sourcemap: true, banner, exports: "named" };
 
